@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>My Journal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#FAF4EE;--s1:#F5EAE1;--s2:#EFE0D4;
+  --bd:rgba(180,110,120,0.2);
+  --pk:#C0788A;--rs:#A85868;--bl:#7A9AB8;--sg:#8AAA7C;--vt:#A898BC;--gd:#C4A870;
+  --tx:#3A2420;--mt:#9A8070;--ft:#EAE0D8;--wh:#FFFAF6;
+}
+html,body{height:100%;background:var(--bg);}
+body{font-family:'Jost',sans-serif;color:var(--tx);max-width:480px;margin:0 auto;position:relative;}
+#root{height:100vh;display:flex;flex-direction:column;}
+.screen{flex:1;overflow-y:auto;padding:22px 18px 90px;}
+.screen::-webkit-scrollbar{width:3px;}
+.screen::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px;}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(250,244,238,0.97);backdrop-filter:blur(12px);border-top:1px solid var(--bd);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;padding:9px 0 7px;cursor:pointer;border:none;background:transparent;color:var(--mt);font-family:'Jost';transition:color .2s;}
+.nb.on{color:var(--pk);}
+.ni{font-size:16px;line-height:1;}
+.nl{font-size:9px;margin-top:3px;letter-spacing:.7px;text-transform:uppercase;font-weight:500;}
+h1{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;margin-bottom:4px;}
+.sub{font-size:12px;color:var(--mt);margin-bottom:24px;line-height:1.6;}
+.sl{font-size:10px;color:var(--pk);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:500;}
+.hr{height:1px;background:var(--bd);margin:18px 0;}
+.toast{position:fixed;bottom:78px;left:50%;transform:translateX(-50%);background:var(--wh);border:1px solid var(--bd);border-left:3px solid var(--pk);border-radius:9px;padding:10px 18px;font-size:13px;color:var(--tx);z-index:200;white-space:nowrap;box-shadow:0 4px 20px rgba(60,36,32,0.1);animation:fi .25s ease;}
+@keyframes fi{from{opacity:0;transform:translateX(-50%) translateY(8px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+@keyframes pulse{0%,100%{opacity:.4;transform:scale(1);}50%{opacity:1;transform:scale(1.3);}}
+@keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.3;}40%{transform:translateY(-5px);opacity:1;}}
+.card{background:var(--wh);border-radius:13px;border:1px solid var(--bd);padding:16px;box-shadow:0 2px 12px rgba(0,0,0,0.04);}
+.inp{width:100%;background:var(--wh);border:1.5px solid var(--bd);border-radius:8px;padding:10px 12px;color:var(--tx);font-family:'Jost';font-size:13px;outline:none;transition:border-color .2s;}
+.inp:focus{border-color:var(--pk);}
+.inp::placeholder{color:var(--mt);opacity:.7;}
+.ta{width:100%;background:var(--wh);border:1.5px solid var(--bd);border-radius:8px;padding:10px 12px;color:var(--tx);font-family:'Jost';font-size:13px;line-height:1.65;resize:none;outline:none;transition:border-color .2s;}
+.ta:focus{border-color:var(--pk);}
+.ta::placeholder{color:var(--mt);opacity:.7;}
+.bp{padding:9px 20px;background:var(--pk);color:var(--wh);border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Jost';transition:background .2s;}
+.bp:hover{background:var(--rs);}
+.bp:disabled{opacity:.4;cursor:not-allowed;}
+.bo{padding:9px 14px;background:transparent;color:var(--mt);border:1.5px solid var(--bd);border-radius:8px;font-size:12px;cursor:pointer;font-family:'Jost';transition:all .2s;}
+.bo:hover{border-color:var(--pk);color:var(--pk);}
+.chip{padding:6px 13px;border-radius:18px;border:1.5px solid var(--bd);font-size:11px;font-weight:500;white-space:nowrap;cursor:pointer;background:var(--wh);color:var(--mt);font-family:'Jost';transition:all .2s;}
+.chip.on{background:var(--pk);color:var(--wh);border-color:var(--pk);}
+.chip.ov{background:var(--vt);color:var(--wh);border-color:var(--vt);}
+.chips{display:flex;gap:5px;overflow-x:auto;padding-bottom:3px;margin-bottom:9px;}
+.chips::-webkit-scrollbar{display:none;}
+.bar-bg{height:6px;background:var(--ft);border-radius:3px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:3px;transition:width .7s;}
+.settings-overlay{position:fixed;inset:0;background:rgba(58,36,32,0.4);backdrop-filter:blur(4px);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;}
+.settings-box{background:var(--wh);border-radius:16px;padding:28px 24px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(58,36,32,0.2);}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+const {useState,useEffect,useRef,useCallback}=React;
+
+/* ── STORAGE (localStorage) ── */
+const ld=(k)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch{return null;}};
+const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
+
+/* ── CLAUDE API ── */
+const MODELS=['claude-opus-4-5','claude-3-5-sonnet-20241022','claude-3-5-haiku-20241022'];
+const callClaude=async(messages,system='',maxTokens=1000)=>{
+  const key=ld('api_key');
+  if(!key)return{ok:false,error:'No API key. Tap ⚙ on Home to add one.'};
+  const model=ld('api_model')||MODELS[0];
+  const body={model,max_tokens:maxTokens,messages};
+  if(system)body.system=system;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify(body)
+    });
+    const d=await r.json();
+    if(d.error)return{ok:false,error:`API error: ${d.error.message||JSON.stringify(d.error)}`};
+    const text=d.content?.find(b=>b.type==='text')?.text||null;
+    return{ok:true,text};
+  }catch(e){
+    const msg=e.message||String(e);
+    if(msg.includes('Failed to fetch')||msg.includes('NetworkError')||msg.includes('CORS')){
+      return{ok:false,error:'CORS error — open the file via a local server instead of double-clicking it. See ⚙ for instructions.'};
+    }
+    return{ok:false,error:msg};
+  }
+};
+const ai=async(messages,system='',maxTokens=1000)=>{
+  const r=await callClaude(messages,system,maxTokens);
+  if(!r.ok){sv('last_api_error',r.error);return null;}
+  sv('last_api_error',null);return r.text;
+};
+
+/* ── UTILS ── */
+const todayStr=()=>new Date().toISOString().split('T')[0];
+const fmtDate=(s)=>{try{return new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short'});}catch{return s;}};
+const fmtFull=(s)=>{try{return new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}catch{return s;}};
+const fmtTime=(s)=>{try{return new Date(s).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}catch{return '';}};
+const greet=()=>{const h=new Date().getHours();if(h<5)return'Still up?';if(h<12)return'Good morning';if(h<17)return'Good afternoon';if(h<21)return'Good evening';return'Late night';};
+const wkNum=()=>Math.ceil((Date.now()-new Date('2025-01-01').getTime())/604800000)%12+1;
+
+/* ── ANALYSIS ── */
+const analyze=(entries)=>{
+  if(!entries.length)return{ag:50,sc:0,wc:0,sw:50,terr:{}};
+  const t=entries.map(e=>(e.body||'').toLowerCase()).join(' ');
+  const sc=(t.match(/\b(should|must|have to|need to|supposed to)\b/g)||[]).length;
+  const wc=(t.match(/\b(want|chose|choosing|decided|building|creating|going to)\b/g)||[]).length;
+  const ac=(t.match(/\b(i chose|i decided|i want|i will|i started)\b/g)||[]).length;
+  const pc=(t.match(/\b(had to|ended up|was forced|can't seem)\b/g)||[]).length;
+  const T={Creative:['creat','make','build','art','writ','design','imagin','dream'],Career:['job','work','career','money','earn','client','profess','salary'],Body:['sport','exercis','body','health','run','walk','strength','energy'],Mother:['kid','child','famil','home','school','parent'],Inner:['feel','think','wonder','realiz','understand','myself'],Fear:['afraid','scared','anxious','worr','fear','panic']};
+  const terr={};let mx=1;
+  for(const[n,kws]of Object.entries(T)){const s=kws.reduce((x,k)=>x+(t.split(k).length-1),0);terr[n]=s;if(s>mx)mx=s;}
+  for(const n of Object.keys(terr))terr[n]=Math.max(4,Math.round(terr[n]/mx*100));
+  return{ag:Math.round(Math.max(ac,1)/Math.max(ac+pc,1)*100),sc,wc,sw:sc+wc>0?Math.round(wc/(sc+wc)*100):50,terr};
+};
+const analyzePn=(entries)=>{
+  const t=entries.map(e=>(e.body||'').toLowerCase()).join(' ');
+  const w=Math.max(t.split(/\s+/).length,1);
+  const iW=(t.match(/\b(i|me|my|myself|mine)\b/g)||[]).length;
+  const weW=(t.match(/\b(we|us|our|ourselves)\b/g)||[]).length;
+  const youW=(t.match(/\byou\b/g)||[]).length;
+  const theyW=(t.match(/\b(they|them|their|themselves)\b/g)||[]).length;
+  const tot=Math.max(iW+weW+youW+theyW,1);
+  const iR=Math.round(iW/w*1000)/10;
+  let interp='';
+  if(iR<3)interp='Low self-focus. Outward-directed, building.';
+  else if(iR<6)interp='Balanced. Present without being consumed.';
+  else if(iR<10)interp='Elevated self-focus. Inner world demanding attention.';
+  else interp='High I-rate — often what good processing looks like.';
+  return{iW,weW,youW,theyW,iR,interp,iPct:Math.round(iW/tot*100),wePct:Math.round(weW/tot*100),youPct:Math.round(youW/tot*100),theyPct:Math.round(theyW/tot*100),weR:Math.round(weW/w*1000)/10,youR:Math.round(youW/w*1000)/10,theyR:Math.round(theyW/w*1000)/10};
+};
+const detectLoops=(entries)=>{
+  const t=entries.map(e=>(e.body||'').toLowerCase()).join(' ');
+  const L=["i always end up","the problem is i","i just can't seem","i never","i always","i can't","i don't know how","i should be","it's too late","maybe i'm not"];
+  return L.map(l=>({p:l,n:t.split(l).length-1})).filter(l=>l.n>=2).sort((a,b)=>b.n-a.n).slice(0,5);
+};
+const detectBosses=(entries)=>detectLoops(entries).filter(l=>l.n>=3).map((l,i)=>({id:`b${i}`,name:`The ${l.p.replace(/^i /,'').split(' ').map(w=>w[0].toUpperCase()+w.slice(1)).join(' ')} Pattern`,phrase:`"${l.p}..."`,count:l.n}));
+
+/* ── CONSTANTS ── */
+const MODES=[{id:'blurt',l:'Blurt',p:'No rules. Just get it out.'},{id:'depth',l:'Depth',p:"What's really going on underneath?"},{id:'voice',l:'One Line',p:"One sentence. That's it."},{id:'spiral',l:'Spiral',p:'Follow one thread wherever it goes.'},{id:'scan',l:'Scan',p:"Check in. Body. Mind. That's all."}];
+const ALTERS=[{id:'standard',l:'Yourself',p:null},{id:'future',l:'Future Self',p:"What does she already know that you're still figuring out?"},{id:'masked',l:'Masked Self',p:"What does the performance version of you think, underneath?"},{id:'child',l:'The Child',p:"What did young you know that got trained out?"},{id:'unseen',l:'Unseen One',p:"The self nobody in your life has actually met yet. What would she say?"}];
+const DCOLS=['#C0788A','#A85868','#8AAA7C','#7A9AB8','#A898BC','#C4A870','#8AABB8','#C8948C','#9AB890','#B8A0C8'];
+const DDFT=[{id:'1',emoji:'💼',title:'New Career',color:'#7A9AB8',desc:'',evidence:[],nextStep:'',secretPhrase:''},{id:'2',emoji:'💛',title:'More Money',color:'#C4A870',desc:'',evidence:[],nextStep:'',secretPhrase:''},{id:'3',emoji:'🌿',title:'Strong Body',color:'#8AAA7C',desc:'',evidence:[],nextStep:'',secretPhrase:''}];
+const TC={Creative:'#C0788A',Career:'#7A9AB8',Body:'#8AAA7C',Mother:'#A85868',Inner:'#A898BC',Fear:'#B8A8A0'};
+const SYS=(entries,dreams,stats)=>`You are an Oracle in someone's personal journal. AuDHD mom with big dreams. Direct, warm, dry wit. Believe in her capacity completely. ONE question at a time.
+STATS: Agency ${stats.ag}% | Shoulds ${stats.sc} | Wants ${stats.wc}
+DREAMS: ${dreams.map(d=>`${d.emoji} ${d.title}: "${d.desc||'?'}" Next:"${d.nextStep||'?'}" Wins:${(d.evidence||[]).length}`).join(' · ')}
+ENTRIES:
+${entries.slice(0,6).map(e=>`[${(e.type||'').toUpperCase()}-${e.date}-${e.mode||''}-${e.alterEgo||'std'}-${e.voice||'?'}]\n${e.title}\n${(e.body||'').slice(0,280)}`).join('\n---\n')||'No entries yet.'}`;
+
+/* ── TOAST ── */
+function Toast({msg}){return <div className="toast">{msg}</div>;}
+
+/* ── SETTINGS ── */
+function Settings({onClose}){
+  const [key,setKey]=useState(ld('api_key')||'');
+  const [model,setModel]=useState(ld('api_model')||MODELS[0]);
+  const [testing,setTesting]=useState(false);
+  const [testResult,setTestResult]=useState(null);
+  const lastErr=ld('last_api_error');
+  const saveAll=()=>{sv('api_key',key.trim());sv('api_model',model);onClose();};
+  const test=async()=>{
+    if(!key.trim()){setTestResult({ok:false,msg:'Enter your API key first.'});return;}
+    sv('api_key',key.trim());sv('api_model',model);
+    setTesting(true);setTestResult(null);
+    const r=await callClaude([{role:'user',content:'Reply with exactly: OK'}],'',20);
+    if(r.ok)setTestResult({ok:true,msg:'✓ Connected! AI features are active.'});
+    else setTestResult({ok:false,msg:r.error});
+    setTesting(false);
+  };
+  return(
+    <div className="settings-overlay" onClick={onClose}>
+      <div className="settings-box" onClick={e=>e.stopPropagation()}>
+        <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:24,fontWeight:600,marginBottom:8}}>Settings</div>
+        {lastErr&&!testResult&&<div style={{padding:'10px 13px',background:'rgba(168,88,104,0.1)',borderRadius:8,border:'1px solid rgba(168,88,104,0.3)',fontSize:12,color:'var(--rs)',marginBottom:16,lineHeight:1.6}}>Last error: {lastErr}</div>}
+        <div className="sl">Anthropic API Key</div>
+        <input className="inp" type="password" placeholder="sk-ant-..." value={key} onChange={e=>setKey(e.target.value)} style={{marginBottom:10}}/>
+        <div className="sl">Model</div>
+        <select value={model} onChange={e=>setModel(e.target.value)} style={{width:'100%',background:'var(--wh)',border:'1.5px solid var(--bd)',borderRadius:8,padding:'9px 12px',color:'var(--tx)',fontFamily:'Jost',fontSize:13,outline:'none',marginBottom:14,cursor:'pointer'}}>
+          {MODELS.map(m=><option key={m} value={m}>{m}</option>)}
+        </select>
+        {testResult&&<div style={{padding:'10px 13px',background:testResult.ok?'rgba(138,170,124,0.15)':'rgba(168,88,104,0.1)',borderRadius:8,border:`1px solid ${testResult.ok?'var(--sg)':'rgba(168,88,104,0.3)'}`,fontSize:12,color:testResult.ok?'var(--sg)':'var(--rs)',marginBottom:14,lineHeight:1.6}}>{testResult.msg}</div>}
+        <div style={{display:'flex',gap:8,marginBottom:14}}>
+          <button className="bp" style={{flex:1}} onClick={saveAll}>Save</button>
+          <button className="bo" onClick={test} disabled={testing} style={{opacity:testing?.5:1}}>{testing?'Testing...':'Test connection'}</button>
+          <button className="bo" onClick={onClose}>✕</button>
+        </div>
+        <div style={{fontSize:11,color:'var(--mt)',lineHeight:1.7,padding:'12px 13px',background:'var(--s1)',borderRadius:8,borderLeft:'3px solid var(--gd)'}}>
+          <strong style={{color:'var(--tx)'}}>If you get a CORS error</strong> — your browser blocks direct API calls from files opened via double-click.<br/><br/>
+          Fix: open Terminal and run:<br/>
+          <code style={{background:'var(--s2)',padding:'2px 6px',borderRadius:4,fontSize:11}}>cd Downloads && python3 -m http.server 8080</code><br/>
+          Then open <a href="http://localhost:8080" target="_blank" style={{color:'var(--pk)'}}>localhost:8080</a> in your browser.<br/><br/>
+          Get a free API key at <a href="https://console.anthropic.com" target="_blank" style={{color:'var(--pk)'}}>console.anthropic.com</a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── HOME ── */
+function Home({entries,dreams,cap,setCap,hfs,addHf,onNav,onSettings}){
+  const [q,setQ]=useState(null);const [ql,setQl]=useState(false);const [hf,setHf]=useState('');
+  const hasKey=!!ld('api_key');
+  useEffect(()=>{
+    const gen=async()=>{
+      const c=ld('hq');
+      if(c?.t&&(Date.now()-c.ts)/3.6e6<8){setQ(c.t);return;}
+      if(entries.length<2){setQ("What's the one thing you haven't said out loud yet — not even to yourself?");return;}
+      if(!hasKey){setQ("What would you do today if you trusted yourself completely?");return;}
+      setQl(true);
+      const recent=entries.slice(0,3).map(e=>`[${e.date}] ${e.title}: ${(e.body||'').slice(0,200)}`).join('\n---\n');
+      const dc=dreams.map(d=>`${d.title}:${d.desc||'?'}`).join('|');
+      const txt=await ai([{role:'user',content:`ONE short penetrating question for today. Specific. Not generic. Max 2 sentences. Return ONLY the question.\nDreams: ${dc}\nEntries:\n${recent}`}],'',120);
+      setQ(txt||"What are you not saying yet?");
+      sv('hq',{t:txt||"What are you not saying yet?",ts:Date.now()});
+      setQl(false);
+    };gen();
+  },[entries.length,hasKey]);
+  const stats=analyze(entries);
+  const logHf=()=>{if(!hf.trim())return;addHf(hf.trim());setHf('');};
+  return(
+    <div className="screen">
+      <div style={{display:'flex',justifyContent:'space-between',marginBottom:22}}>
+        <div>
+          <div style={{fontSize:11,color:'var(--mt)',letterSpacing:'1.5px',textTransform:'uppercase',fontWeight:500}}>{greet()}</div>
+          <div style={{fontSize:11,color:'var(--pk)',fontStyle:'italic',marginTop:3}}>Season 1 · Week {wkNum()}</div>
+        </div>
+        <div style={{display:'flex',alignItems:'flex-start',gap:10}}>
+          <div style={{textAlign:'right',fontSize:11,color:'var(--mt)'}}><span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22,color:'var(--tx)',display:'block'}}>{entries.length}</span>entries</div>
+          <button onClick={onSettings} style={{background:'transparent',border:'1px solid var(--bd)',borderRadius:6,padding:'4px 8px',cursor:'pointer',fontSize:12,color:'var(--mt)'}}>⚙</button>
+        </div>
+      </div>
+
+      <div className="card" style={{marginBottom:20,position:'relative',overflow:'hidden'}}>
+        <div style={{position:'absolute',top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,transparent,var(--pk),transparent)`,opacity:.6}}/>
+        <div style={{fontSize:10,color:'var(--pk)',letterSpacing:'2px',textTransform:'uppercase',marginBottom:13,fontWeight:500,display:'flex',alignItems:'center',gap:8}}>
+          <span style={{width:6,height:6,borderRadius:'50%',background:'var(--pk)',display:'inline-block',animation:'pulse 2s infinite'}}/>
+          <style>{`@keyframes pulse{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}`}</style>
+          Claude has been thinking about you
+        </div>
+        {ql?<div style={{fontSize:13,fontStyle:'italic',color:'var(--pk)',opacity:.5}}>reading your last entries...</div>
+          :<div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:21,fontStyle:'italic',lineHeight:1.55}}>{q||"What's the one thing you haven't said out loud yet?"}</div>}
+        {!ql&&<div style={{marginTop:14,fontSize:12,color:'var(--pk)',cursor:'pointer',fontWeight:500}} onClick={()=>onNav('journal')}>→ Write about this</div>}
+      </div>
+
+      <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:22}}>
+        <span style={{fontSize:11,color:'var(--mt)',fontWeight:500,whiteSpace:'nowrap'}}>Capacity today</span>
+        <div style={{display:'flex',gap:6}}>
+          {[1,2,3,4,5].map(n=><button key={n} onClick={()=>setCap(n)} style={{width:30,height:30,borderRadius:'50%',border:`1.5px solid ${cap===n?'var(--pk)':'var(--bd)'}`,background:cap===n?'var(--pk)':'var(--wh)',color:cap===n?'var(--wh)':'var(--mt)',cursor:'pointer',fontSize:11,fontFamily:'Jost',fontWeight:500}}>{n}</button>)}
+        </div>
+      </div>
+
+      <div className="sl">Your dreams</div>
+      <div style={{display:'flex',gap:8,marginBottom:20}}>
+        {dreams.map(d=><div key={d.id} onClick={()=>onNav('dreams')} style={{flex:1,padding:'13px 8px',borderRadius:11,border:`1.5px solid ${d.color}66`,background:`${d.color}10`,cursor:'pointer',textAlign:'center',transition:'transform .25s'}} onMouseEnter={e=>e.currentTarget.style.transform='translateY(-2px)'} onMouseLeave={e=>e.currentTarget.style.transform='translateY(0)'}>
+          <div style={{fontSize:22,marginBottom:6}}>{d.emoji}</div>
+          <div style={{fontSize:10,fontWeight:600,color:d.color}}>{d.title}</div>
+          <div style={{fontSize:9,marginTop:3,opacity:.55}}>{(d.evidence||[]).length} wins</div>
+        </div>)}
+      </div>
+
+      <div className="card" style={{marginBottom:18}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',marginBottom:8}}>
+          <span style={{fontSize:11,color:'var(--mt)',fontWeight:500}}>Agency in your language</span>
+          <span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:22,color:stats.ag>50?'var(--sg)':'var(--pk)'}}>{stats.ag}%</span>
+        </div>
+        <div className="bar-bg"><div className="bar-fill" style={{width:`${stats.ag}%`,background:stats.ag>50?'var(--sg)':'var(--pk)'}}/></div>
+        <div style={{fontSize:10,color:'var(--mt)',marginTop:7}}>{stats.sc} shoulds · {stats.wc} wants · {entries.length} entries total</div>
+      </div>
+
+      <div className="sl">Log a hyperfocus ✦</div>
+      <div style={{display:'flex',gap:8}}>
+        <input className="inp" style={{flex:1}} placeholder="What fell into today — topic, how long..." value={hf} onChange={e=>setHf(e.target.value)} onKeyDown={e=>e.key==='Enter'&&logHf()}/>
+        <button className="bp" onClick={logHf}>+ Log</button>
+      </div>
+      {hfs.length>0&&<div style={{fontSize:11,color:'var(--mt)',marginTop:7}}>{hfs.length} logged → see Map</div>}
+    </div>
+  );
+}
+
+/* ── JOURNAL ── */
+function Journal({entries,setEntries}){
+  const [mode,setMode]=useState('blurt');const [alt,setAlt]=useState('standard');const [type,setType]=useState('personal');const [voice,setVoice]=useState(null);const [title,setTitle]=useState('');const [body,setBody]=useState('');const [date,setDate]=useState(todayStr());const [active,setActive]=useState(null);const [toast,setToast]=useState(null);
+  const br=useRef(null);
+  const st=(m)=>{setToast(m);setTimeout(()=>setToast(null),2200);};
+  const startNew=()=>{setActive(null);setTitle('');setBody('');setDate(todayStr());setVoice(null);setAlt('standard');setTimeout(()=>br.current?.focus(),60);};
+  const pick=(e)=>{setActive(e.id);setTitle(e.title||'');setBody(e.body||'');setDate(e.date);setType(e.type||'personal');setMode(e.mode||'blurt');setAlt(e.alterEgo||'standard');setVoice(e.voice||null);};
+  const saveE=()=>{
+    if(!body.trim()&&!title.trim())return;
+    let upd;
+    if(!active){const ne={id:Date.now().toString(),title:title||'Untitled',body,type,date,mode,alterEgo:alt,voice,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};upd=[ne,...entries];setActive(ne.id);}
+    else upd=entries.map(e=>e.id===active?{...e,title:title||'Untitled',body,type,date,mode,alterEgo:alt,voice,updatedAt:new Date().toISOString()}:e);
+    setEntries(upd);sv('journal_entries',upd);sv('hq',null);st('Saved ✓');
+  };
+  const delE=()=>{const upd=entries.filter(e=>e.id!==active);setEntries(upd);sv('journal_entries',upd);setActive(null);setTitle('');setBody('');st('Deleted');};
+  const cm=MODES.find(m=>m.id===mode);const ca=ALTERS.find(a=>a.id===alt);
+  const sorted=[...entries].sort((a,b)=>new Date(b.updatedAt)-new Date(a.updatedAt));
+  return(
+    <div className="screen" style={{position:'relative'}}>
+      <h1>Journal</h1>
+      <div className="chips">{MODES.map(m=><button key={m.id} className={`chip ${mode===m.id?'on':''}`} onClick={()=>setMode(m.id)}>{m.l}</button>)}</div>
+      <div className="sl" style={{marginBottom:6}}>Writing as</div>
+      <div className="chips">{ALTERS.map(a=><button key={a.id} className={`chip ${alt===a.id?'ov':''}`} onClick={()=>setAlt(a.id)}>{a.l}</button>)}</div>
+      <div style={{display:'flex',gap:6,marginBottom:14,alignItems:'center'}}>
+        <button className="chip" style={type==='personal'?{background:'var(--rs)',borderColor:'var(--rs)',color:'white'}:{}} onClick={()=>setType('personal')}>Personal</button>
+        <button className="chip" style={type==='professional'?{background:'var(--bl)',borderColor:'var(--bl)',color:'white'}:{}} onClick={()=>setType('professional')}>Work</button>
+        <button className="bo" style={{marginLeft:'auto',fontSize:11}} onClick={startNew}>+ New</button>
+      </div>
+      {ca?.p&&<div style={{fontFamily:"'Cormorant Garamond',serif",fontStyle:'italic',fontSize:14,color:'var(--vt)',marginBottom:10}}>"{ca.p}"</div>}
+      {!ca?.p&&cm&&<div style={{fontFamily:"'Cormorant Garamond',serif",fontStyle:'italic',fontSize:14,color:'var(--mt)',marginBottom:10}}>"{cm.p}"</div>}
+      <input style={{width:'100%',background:'transparent',border:'none',outline:'none',fontFamily:"'Cormorant Garamond',serif",fontSize:28,fontWeight:600,color:'var(--tx)',marginBottom:10,lineHeight:1.2}} placeholder="Title..." value={title} onChange={e=>setTitle(e.target.value)}/>
+      <textarea ref={br} style={{width:'100%',background:'transparent',border:'none',outline:'none',fontFamily:'Jost',fontSize:15,lineHeight:1.9,color:'var(--tx)',resize:'none',minHeight:150}} placeholder="Write..." value={body} onChange={e=>setBody(e.target.value)}/>
+      <div className="sl" style={{marginTop:10,marginBottom:6}}>How did this feel?</div>
+      <div style={{display:'flex',gap:8,marginBottom:14}}>
+        <button onClick={()=>setVoice(voice==='masked'?null:'masked')} style={{flex:1,padding:9,borderRadius:8,border:`1.5px solid ${voice==='masked'?'var(--rs)':'var(--bd)'}`,background:voice==='masked'?'rgba(168,88,104,0.1)':'var(--wh)',color:voice==='masked'?'var(--rs)':'var(--mt)',fontSize:11,cursor:'pointer',fontFamily:'Jost',fontWeight:500,transition:'all .2s'}}>🎭 Masked — performing</button>
+        <button onClick={()=>setVoice(voice==='real'?null:'real')} style={{flex:1,padding:9,borderRadius:8,border:`1.5px solid ${voice==='real'?'var(--sg)':'var(--bd)'}`,background:voice==='real'?'rgba(138,170,124,0.15)':'var(--wh)',color:voice==='real'?'var(--sg)':'var(--mt)',fontSize:11,cursor:'pointer',fontFamily:'Jost',fontWeight:500,transition:'all .2s'}}>🌿 Real — actually yours</button>
+      </div>
+      <div style={{display:'flex',gap:8,marginBottom:18,alignItems:'center'}}>
+        <button className="bp" onClick={saveE}>Save</button>
+        {active&&<button className="bo" onClick={delE}>Delete</button>}
+        <input type="date" value={date} onChange={e=>setDate(e.target.value)} style={{marginLeft:'auto',background:'transparent',border:'none',color:'var(--mt)',fontSize:11,fontFamily:'Jost',outline:'none',cursor:'pointer'}}/>
+      </div>
+      {sorted.length>0&&<>
+        <div className="hr"/>
+        <div className="sl">Past entries</div>
+        {sorted.map(e=><div key={e.id} onClick={()=>pick(e)} style={{padding:'13px 15px',background:'var(--wh)',borderRadius:10,borderLeft:`3px solid ${e.type==='personal'?'var(--rs)':'var(--bl)'}`,marginBottom:8,cursor:'pointer',boxShadow:'0 1px 6px rgba(0,0,0,0.04)',transition:'box-shadow .15s'}} onMouseEnter={ev=>ev.currentTarget.style.boxShadow='0 2px 12px rgba(180,110,120,0.12)'} onMouseLeave={ev=>ev.currentTarget.style.boxShadow='0 1px 6px rgba(0,0,0,0.04)'}>
+          <div style={{fontSize:10,color:'var(--mt)',marginBottom:2}}>{fmtDate(e.date)} · {e.type} · {e.mode}{e.alterEgo&&e.alterEgo!=='standard'?` · ${e.alterEgo}`:''}{e.voice?` · ${e.voice==='masked'?'🎭':'🌿'}`:''}</div>
+          <div style={{fontSize:14,fontWeight:500,marginBottom:2}}>{e.title}</div>
+          <div style={{fontSize:12,color:'var(--mt)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{(e.body||'').slice(0,65)}…</div>
+        </div>)}
+      </>}
+      {toast&&<Toast msg={toast}/>}
+    </div>
+  );
+}
+
+/* ── DREAMS ── */
+function Dreams({dreams,setDreams}){
+  const [open,setOpen]=useState(null);const [edit,setEdit]=useState(null);const [newEv,setNewEv]=useState({});const [toast,setToast]=useState(null);
+  const st=(m)=>{setToast(m);setTimeout(()=>setToast(null),2000);};
+  const upd=(id,ch)=>{const u=dreams.map(d=>d.id===id?{...d,...ch}:d);setDreams(u);sv('dream_threads',u);};
+  const addD=()=>{const nd={id:Date.now().toString(),emoji:'✨',title:'New Dream',color:DCOLS[dreams.length%DCOLS.length],desc:'',evidence:[],nextStep:'',secretPhrase:''};const u=[...dreams,nd];setDreams(u);sv('dream_threads',u);setOpen(nd.id);setEdit(nd.id);};
+  const delD=(id)=>{const u=dreams.filter(d=>d.id!==id);setDreams(u);sv('dream_threads',u);setOpen(null);setEdit(null);st('Removed');};
+  const addEv=(id)=>{const t=(newEv[id]||'').trim();if(!t)return;const dr=dreams.find(d=>d.id===id);const ev={text:t,date:todayStr(),id:Date.now().toString()};upd(id,{evidence:[...(dr.evidence||[]),ev]});setNewEv(p=>({...p,[id]:''}));st('Win logged ✓');};
+  return(
+    <div className="screen" style={{position:'relative'}}>
+      <h1>Your Dreams</h1>
+      <div className="sub">Make these completely yours.</div>
+      {dreams.map(d=>(
+        <div key={d.id} className="card" style={{marginBottom:13}}>
+          <div style={{display:'flex',alignItems:'center',gap:13,cursor:'pointer'}} onClick={()=>setOpen(open===d.id?null:d.id)}>
+            <span style={{fontSize:26}}>{d.emoji}</span>
+            <div>
+              <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:21,fontWeight:600,color:d.color}}>{d.title}</div>
+              <div style={{fontSize:11,color:'var(--mt)',marginTop:2}}>{(d.evidence||[]).length} wins · {d.nextStep?'step set':'needs next step'}</div>
+            </div>
+            <span style={{marginLeft:'auto',color:'var(--mt)',fontSize:20}}>{open===d.id?'−':'+'}</span>
+          </div>
+          {open===d.id&&<div style={{borderTop:'1px solid var(--ft)',marginTop:14,paddingTop:14,display:'flex',flexDirection:'column',gap:14}}>
+            {edit!==d.id&&<button className="bo" style={{alignSelf:'flex-start',fontSize:11}} onClick={()=>setEdit(d.id)}>✎ Edit name &amp; colour</button>}
+            {edit===d.id&&<div style={{background:'var(--s1)',borderRadius:10,padding:13,border:'1px solid var(--ft)',display:'flex',flexDirection:'column',gap:11}}>
+              <div style={{display:'flex',gap:8,alignItems:'center'}}>
+                <input value={d.emoji} onChange={e=>upd(d.id,{emoji:e.target.value.slice(-2)||'✨'})} style={{width:46,background:'var(--wh)',border:'1.5px solid var(--bd)',borderRadius:7,padding:7,textAlign:'center',fontSize:20,outline:'none'}}/>
+                <input className="inp" style={{flex:1}} placeholder="Dream name..." value={d.title} onChange={e=>upd(d.id,{title:e.target.value})}/>
+              </div>
+              <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                {DCOLS.map(c=><div key={c} onClick={()=>upd(d.id,{color:c})} style={{width:24,height:24,borderRadius:'50%',background:c,cursor:'pointer',border:`2.5px solid ${d.color===c?'var(--tx)':'transparent'}`,transform:d.color===c?'scale(1.18)':'scale(1)',transition:'all .15s'}}/>)}
+              </div>
+              <div style={{display:'flex',gap:8}}><button className="bp" style={{flex:1}} onClick={()=>setEdit(null)}>Done</button><button className="bo" style={{fontSize:11}} onClick={()=>delD(d.id)}>Delete dream</button></div>
+            </div>}
+            {d.secretPhrase&&<div style={{padding:'13px 15px',background:'rgba(196,168,112,0.1)',borderLeft:'3px solid var(--gd)',borderRadius:'0 9px 9px 0',fontFamily:"'Cormorant Garamond',serif",fontStyle:'italic',fontSize:15,lineHeight:1.6}}>"{d.secretPhrase}"</div>}
+            <div><div className="sl">Your secret phrase</div><input className="inp" placeholder="A sentence that feels true about your future self..." value={d.secretPhrase||''} onChange={e=>upd(d.id,{secretPhrase:e.target.value})}/></div>
+            <div><div className="sl">What it feels like when you have it</div><textarea className="ta" rows={3} placeholder="Sensory detail. Tuesday morning. What's different?" value={d.desc||''} onChange={e=>upd(d.id,{desc:e.target.value})}/></div>
+            <div><div className="sl">Next weird, specific step</div><input className="inp" placeholder="One small, concrete action..." value={d.nextStep||''} onChange={e=>upd(d.id,{nextStep:e.target.value})}/></div>
+            <div>
+              <div className="sl">Evidence board</div>
+              {!(d.evidence||[]).length&&<div style={{fontSize:12,color:'var(--mt)',fontStyle:'italic',marginBottom:8}}>No wins yet. Log the first tiny one.</div>}
+              {(d.evidence||[]).slice(-6).map(ev=><div key={ev.id} style={{display:'flex',gap:10,padding:'7px 0',borderBottom:'1px solid var(--ft)',fontSize:13}}><span style={{fontSize:10,color:'var(--pk)',fontWeight:500,whiteSpace:'nowrap',marginTop:2}}>{fmtDate(ev.date)}</span><span>{ev.text}</span></div>)}
+              <div style={{display:'flex',gap:8,marginTop:10}}>
+                <input className="inp" style={{flex:1}} placeholder="Log a win, a movement, a sign..." value={newEv[d.id]||''} onChange={e=>setNewEv(p=>({...p,[d.id]:e.target.value}))} onKeyDown={e=>e.key==='Enter'&&addEv(d.id)}/>
+                <button onClick={()=>addEv(d.id)} style={{padding:'10px 15px',background:'transparent',border:'1.5px solid var(--pk)',color:'var(--pk)',borderRadius:8,fontSize:12,cursor:'pointer',fontFamily:'Jost',fontWeight:500,whiteSpace:'nowrap',transition:'all .2s'}}>+ Log</button>
+              </div>
+            </div>
+          </div>}
+        </div>
+      ))}
+      <button onClick={addD} style={{width:'100%',padding:13,background:'transparent',border:'2px dashed var(--bd)',borderRadius:12,color:'var(--mt)',fontSize:13,cursor:'pointer',fontFamily:'Jost',fontWeight:500,transition:'all .2s'}} onMouseEnter={e=>{e.currentTarget.style.borderColor='var(--pk)';e.currentTarget.style.color='var(--pk)';}} onMouseLeave={e=>{e.currentTarget.style.borderColor='var(--bd)';e.currentTarget.style.color='var(--mt)';}}>+ Add a new dream</button>
+      {toast&&<Toast msg={toast}/>}
+    </div>
+  );
+}
+
+/* ── MAP ── */
+function MapScreen({entries,hfs}){
+  const stats=analyze(entries);const pn=analyzePn(entries);const loops=detectLoops(entries);
+  const sorted=Object.entries(stats.terr||{}).sort((a,b)=>b[1]-a[1]);
+  const masked=entries.filter(e=>e.voice==='masked').length;const real=entries.filter(e=>e.voice==='real').length;
+  const starPos=hfs.map((_,i)=>({x:10+((i*37+13)%80),y:15+((i*53+7)%70),sz:7+(i%4)*2,c:['#C0788A','#A898BC','#8AAA7C','#7A9AB8','#C4A870'][i%5]}));
+  if(entries.length<2)return<div className="screen"><h1>Your Map</h1><div style={{textAlign:'center',padding:'50px 20px',color:'var(--mt)',fontStyle:'italic',fontSize:14,lineHeight:1.8}}>Write at least 2 entries to start mapping your territories.<br/>The map builds itself from what you write.</div></div>;
+  return(
+    <div className="screen">
+      <h1>Your Map</h1>
+      <div className="sub">Your inner world, drawn from your actual words</div>
+      <div className="sl">Territories</div>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9,marginBottom:22}}>
+        {sorted.map(([n,s])=><div key={n} style={{background:'var(--wh)',borderRadius:11,border:`1.5px solid ${TC[n]||'#ccc'}55`,padding:'14px 13px',boxShadow:'0 2px 8px rgba(0,0,0,0.03)'}}>
+          <div style={{fontSize:10,fontWeight:600,letterSpacing:'1px',textTransform:'uppercase',color:TC[n]||'#999',marginBottom:5}}>{n}</div>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:34,fontWeight:300,lineHeight:1,color:TC[n]||'#999'}}>{s}</div>
+          <div style={{fontSize:10,opacity:.5,marginTop:3}}>presence</div>
+          <div style={{height:2,borderRadius:1,background:`${TC[n]||'#ccc'}70`,width:`${s}%`,marginTop:10}}/>
+        </div>)}
+      </div>
+      <div className="sl">Pronoun Profile — Pennebaker Method</div>
+      <div className="card" style={{marginBottom:14}}>
+        <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:19,fontWeight:600,marginBottom:3}}>The I-Word Index</div>
+        <div style={{fontSize:11,color:'var(--mt)',marginBottom:14,lineHeight:1.55}}>Pennebaker's research (secretlifeofpronouns.com) found that I-words reveal psychological state more than any content word. This is your pronoun fingerprint.</div>
+        <div style={{display:'flex',alignItems:'center',gap:14,padding:14,background:'var(--s1)',borderRadius:9,marginBottom:12,border:'1px solid var(--ft)'}}>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:48,fontWeight:300,lineHeight:1,color:'var(--pk)',flexShrink:0}}>{pn.iR.toFixed(1)}</div>
+          <div>
+            <div style={{fontSize:10,fontWeight:600,letterSpacing:'1px',textTransform:'uppercase',color:'var(--pk)',marginBottom:4}}>I-words per 100 words</div>
+            <div style={{fontSize:12,color:'var(--mt)',lineHeight:1.55}}>{pn.interp}</div>
+          </div>
+        </div>
+        <div style={{display:'flex',gap:2,height:7,borderRadius:3,overflow:'hidden',marginBottom:7}}>
+          <div style={{flex:pn.iPct,background:'var(--pk)',opacity:.8}}/>
+          <div style={{flex:pn.wePct,background:'var(--sg)',opacity:.8}}/>
+          <div style={{flex:pn.youPct,background:'var(--bl)',opacity:.8}}/>
+          <div style={{flex:pn.theyPct,background:'var(--mt)',opacity:.6}}/>
+        </div>
+        <div style={{display:'flex',gap:10,fontSize:10,color:'var(--mt)',marginBottom:13}}>
+          <span style={{color:'var(--pk)'}}>■ I ({pn.iPct}%)</span><span style={{color:'var(--sg)'}}>■ We ({pn.wePct}%)</span><span style={{color:'var(--bl)'}}>■ You ({pn.youPct}%)</span><span>■ They ({pn.theyPct}%)</span>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:7,marginBottom:12}}>
+          {[['We',pn.weR,'var(--sg)',pn.weR>pn.theyR?'Belonging present':'Solo narrative'],['You',pn.youR,'var(--bl)',pn.youR>0.5?'Socially engaged':'Inward-focused'],['They',pn.theyR,'var(--mt)',pn.theyR>pn.weR?'Others distant':'Others close']].map(([l,v,c,w])=><div key={l} style={{padding:'11px 9px',background:'var(--s1)',borderRadius:9,textAlign:'center',border:'1px solid var(--ft)'}}>
+            <div style={{fontSize:10,fontWeight:600,letterSpacing:'.8px',textTransform:'uppercase',color:c,marginBottom:3}}>{l}</div>
+            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:23,fontWeight:300,lineHeight:1,color:c}}>{v.toFixed(1)}</div>
+            <div style={{fontSize:10,color:'var(--mt)',marginTop:3,lineHeight:1.3}}>{w}</div>
+          </div>)}
+        </div>
+        <div style={{fontSize:12,color:'var(--mt)',lineHeight:1.65,padding:'11px 13px',background:'var(--s1)',borderRadius:8,borderLeft:'3px solid var(--pk)'}}>
+          {pn.iR<4?'Your language leans outward right now — toward action, toward the world you\'re building.':pn.iR<7?'Present in your story without being consumed. A healthy range for active processing.':'A high I-rate is often what good journaling looks like. You\'re paying close attention to yourself.'}
+        </div>
+      </div>
+      <div className="sl">Language Patterns</div>
+      {[['Agency — speaking as the one who acts',stats.ag,'Higher = "I chose / I decided / I\'m building."'],['Want vs Should',stats.sw,`${stats.wc} wants · ${stats.sc} shoulds`]].map(([n,v,note])=><div key={n} className="card" style={{marginBottom:10}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',marginBottom:8}}><span style={{fontSize:12,color:'var(--mt)',fontWeight:500}}>{n}</span><span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:23,color:v>50?'var(--sg)':'var(--pk)'}}>{v}%</span></div>
+        <div className="bar-bg"><div className="bar-fill" style={{width:`${v}%`,background:v>50?'var(--sg)':'var(--pk)'}}/></div>
+        <div style={{fontSize:11,color:'var(--mt)',marginTop:7}}>{note}</div>
+      </div>)}
+      {(masked+real)>0&&<>
+        <div className="sl">Two-Voice Ratio</div>
+        <div style={{display:'flex',gap:9,marginBottom:18}}>
+          {[['🎭',masked,'Masked','var(--rs)'],['🌿',real,'Real','var(--sg)'],['○',entries.length-masked-real,'Untagged','var(--mt)']].map(([em,n,l,c])=><div key={l} style={{flex:1,padding:'14px 10px',background:'var(--wh)',borderRadius:11,border:'1px solid var(--bd)',textAlign:'center',boxShadow:'0 2px 8px rgba(0,0,0,0.03)'}}>
+            <div style={{fontSize:18,marginBottom:5}}>{em}</div><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:28,color:c}}>{n}</div><div style={{fontSize:10,color:'var(--mt)',textTransform:'uppercase',letterSpacing:'1px',marginTop:3,fontWeight:500}}>{l}</div>
+          </div>)}
+        </div>
+        {masked>0&&masked/(masked+real)>0.7&&<div style={{padding:'12px 14px',background:'var(--wh)',borderRadius:9,border:'1px solid rgba(168,88,104,0.25)',borderLeft:'3px solid var(--rs)',marginBottom:16,fontSize:12,color:'var(--rs)'}}>Over 70% masked entries — burnout signal worth noticing.</div>}
+      </>}
+      <div className="sl">Hyperfocus Constellation</div>
+      <div style={{height:110,background:'var(--tx)',borderRadius:11,border:'1px solid var(--bd)',position:'relative',overflow:'hidden',marginBottom:8}}>
+        {hfs.length===0?<div style={{textAlign:'center',padding:'36px 20px',fontSize:12,color:'rgba(250,244,238,0.4)',fontStyle:'italic'}}>Log hyperfocuses on Home to build your constellation</div>
+        :starPos.map((pos,i)=><div key={i} title={hfs[i]?.topic||''} style={{position:'absolute',borderRadius:'50%',transform:'translate(-50%,-50%)',left:`${pos.x}%`,top:`${pos.y}%`,width:pos.sz,height:pos.sz,background:pos.c,opacity:.85,boxShadow:`0 0 ${pos.sz+2}px ${pos.c}`}}/>)}
+      </div>
+      {hfs.length>0&&<div style={{fontSize:10,color:'var(--mt)',textAlign:'center',marginBottom:20}}>{hfs.length} hyperfocuses mapped</div>}
+      {loops.length>0&&<>
+        <div className="sl">Stuck Loops</div>
+        {loops.map((l,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:10,padding:'12px 14px',background:'var(--wh)',borderRadius:9,border:'1px solid var(--bd)',marginBottom:8}}>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontStyle:'italic',fontSize:15,flex:1}}>"{l.p}..."</div>
+          <div style={{fontSize:10,color:'var(--rs)',background:'rgba(168,88,104,0.1)',padding:'3px 9px',borderRadius:10,fontWeight:500,whiteSpace:'nowrap'}}>{l.n}× detected</div>
+        </div>)}
+        <div style={{padding:'12px 14px',background:'var(--wh)',borderRadius:9,border:'1px solid var(--bd)',borderLeft:'3px solid var(--pk)',fontSize:12,color:'var(--mt)',lineHeight:1.65,marginBottom:8}}>Loops 3+ times become Bosses in the Vault.</div>
+      </>}
+    </div>
+  );
+}
+
+/* ── ORACLE ── */
+function Oracle({entries,dreams,echo,setEcho,narrative,setNarrative}){
+  const [msgs,setMsgs]=useState(()=>ld('oracle_chat')||[]);const [inp,setInp]=useState('');const [loading,setLoading]=useState(false);const [echoL,setEchoL]=useState(false);const [narL,setNarL]=useState(false);const [view,setView]=useState('chat');
+  const endRef=useRef(null);const inpRef=useRef(null);
+  useEffect(()=>{endRef.current?.scrollIntoView({behavior:'smooth'});},[msgs]);
+  const hasKey=!!ld('api_key');
+  const send=async()=>{
+    const t=inp.trim();if(!t||loading)return;
+    const um={role:'user',content:t,time:new Date().toISOString()};
+    const next=[...msgs,um];setMsgs(next);setInp('');setLoading(true);
+    const stats=analyze(entries);
+    const reply=await ai(next.map(m=>({role:m.role,content:m.content})),SYS(entries,dreams,stats));
+    const am={role:'assistant',content:reply||"Couldn't connect. Your thoughts are still yours.",time:new Date().toISOString()};
+    const final=[...next,am];setMsgs(final);sv('oracle_chat',final.slice(-40));
+    setLoading(false);
+  };
+  const genEcho=async()=>{
+    if(!entries.length||echoL)return;setEchoL(true);
+    const allText=entries.map(e=>`[${e.date}] ${e.title}: ${(e.body||'').slice(0,300)}`).join('\n---\n');
+    const raw=await ai([{role:'user',content:`Find the 5 sentences from these entries that carry the most truth — where language changed, got specific, broke pattern. Return ONLY valid JSON:\n{"sentences":[{"sentence":"...","context":"brief note"}]}\n\nEntries:\n${allText}`}],'',500);
+    try{const p=JSON.parse((raw||'{}').replace(/```json|```/g,'').trim());const ne={sentences:p.sentences||[],generatedAt:new Date().toISOString()};setEcho(ne);sv('the_echo',ne);setView('echo');}catch{}
+    setEchoL(false);
+  };
+  const genNar=async()=>{
+    if(!entries.length||narL)return;setNarL(true);
+    const allText=entries.map(e=>`[${e.date}-${e.type}] ${e.title}\n${(e.body||'').slice(0,250)}`).join('\n---\n');
+    const txt=await ai([{role:'user',content:`Write a single paragraph narrative about this person's journey — not a summary, a story. She's the protagonist. Write about what shifted, what changed. Reference specific things she wrote. Return ONLY the paragraph.\n\nEntries:\n${allText}`}],'',400);
+    if(txt){const nn={text:txt,generatedAt:new Date().toISOString()};setNarrative(nn);sv('the_narrative',nn);setView('narrative');}
+    setNarL(false);
+  };
+  return(
+    <div className="screen" style={{position:'relative'}}>
+      <div style={{textAlign:'center',padding:'14px 0 20px'}}>
+        <div style={{fontSize:34,marginBottom:9,display:'inline-block',animation:'spin 20s linear infinite'}}><style>{`@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}`}</style>◈</div>
+        <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:27,fontWeight:300,letterSpacing:'3px'}}>The Oracle</div>
+        <div style={{fontSize:11,color:'var(--mt)',letterSpacing:'1px',textTransform:'uppercase',marginTop:5}}>Reads everything · Holds your dreams · Tells you true</div>
+      </div>
+      {!hasKey&&<div style={{padding:'12px 14px',background:'rgba(192,120,138,0.08)',borderRadius:9,border:'1px solid rgba(192,120,138,0.2)',fontSize:12,color:'var(--mt)',marginBottom:16,lineHeight:1.6}}>Add your Anthropic API key (⚙ on Home) to unlock AI features — oracle chat, The Echo, and The Becoming Narrative.</div>}
+      <div style={{display:'flex',gap:7,marginBottom:16}}>
+        {[['chat','◈ Oracle'],['echo',echoL?'Reading...':'◎ The Echo'],['narrative',narL?'Writing...':'✦ Narrative']].map(([v,l])=><button key={v} onClick={()=>{setView(v);if(v==='echo'&&!echo&&hasKey)genEcho();if(v==='narrative'&&!narrative&&hasKey)genNar();}} disabled={v!=='chat'&&(!hasKey||entries.length===0)} style={{flex:1,padding:'9px 6px',background:'var(--wh)',border:`1.5px solid ${view===v?'var(--pk)':'var(--bd)'}`,borderRadius:8,color:view===v?'var(--pk)':'var(--mt)',fontSize:11,cursor:'pointer',fontFamily:'Jost',fontWeight:500,transition:'all .2s',opacity:v!=='chat'&&(!hasKey||entries.length===0)?'.4':'1'}}>{l}</button>)}
+      </div>
+      {view==='echo'&&<div className="card" style={{marginBottom:16}}>
+        <div className="sl" style={{marginBottom:13}}>5 sentences that carry the most truth</div>
+        {echo?.sentences?.length?echo.sentences.map((s,i)=><div key={i} style={{padding:'10px 0 10px 15px',borderLeft:'3px solid var(--pk)',marginBottom:11,fontFamily:"'Cormorant Garamond',serif",fontStyle:'italic',fontSize:17,lineHeight:1.5,color:'var(--tx)'}}>
+          {s.sentence}{s.context&&<div style={{fontSize:10,color:'var(--mt)',fontStyle:'normal',fontFamily:'Jost',marginTop:3}}>{s.context}</div>}
+        </div>):<div style={{textAlign:'center',padding:20,color:'var(--mt)',fontSize:13,fontStyle:'italic'}}>{echoL?'Reading all your entries...':'Click The Echo above to generate'}</div>}
+        {echo&&<button onClick={genEcho} disabled={echoL} style={{width:'100%',padding:10,background:'transparent',border:'1px solid var(--bd)',borderRadius:7,color:'var(--mt)',fontSize:12,cursor:'pointer',fontFamily:'Jost',marginTop:10}}>↻ Regenerate</button>}
+      </div>}
+      {view==='narrative'&&<div className="card" style={{marginBottom:16}}>
+        <div className="sl" style={{marginBottom:13}}>The Becoming Narrative</div>
+        {narrative?.text?<><div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:17,lineHeight:1.85,fontStyle:'italic',color:'var(--tx)'}}>{narrative.text}</div><div style={{fontSize:10,color:'var(--mt)',marginTop:10,textAlign:'center'}}>{fmtFull(narrative.generatedAt)}</div><button onClick={genNar} disabled={narL} style={{width:'100%',padding:10,background:'transparent',border:'1px solid var(--bd)',borderRadius:7,color:'var(--mt)',fontSize:12,cursor:'pointer',fontFamily:'Jost',marginTop:10}}>↻ Regenerate</button></>
+        :<div style={{textAlign:'center',padding:20,color:'var(--mt)',fontSize:13,fontStyle:'italic'}}>{narL?'Writing your narrative...':'Click Narrative above to generate'}</div>}
+      </div>}
+      {view==='chat'&&<>
+        <div style={{display:'flex',flexDirection:'column',gap:11,marginBottom:12}}>
+          {msgs.length===0&&<div style={{maxWidth:'88%',padding:'11px 15px',background:'var(--wh)',border:'1px solid var(--bd)',borderRadius:'13px 13px 13px 3px',fontSize:14,lineHeight:1.65,color:'var(--tx)',boxShadow:'0 2px 8px rgba(0,0,0,0.04)'}}>I've read your entries. I'm holding your dreams. What do you want to think through?</div>}
+          {msgs.map((m,i)=><div key={i} style={{display:'flex',flexDirection:'column',gap:3,alignItems:m.role==='user'?'flex-end':'flex-start'}}>
+            <div style={{maxWidth:'88%',padding:'11px 15px',borderRadius:m.role==='user'?'13px 13px 3px 13px':'13px 13px 13px 3px',fontSize:14,lineHeight:1.65,background:m.role==='user'?'var(--pk)':'var(--wh)',color:m.role==='user'?'var(--wh)':'var(--tx)',border:m.role==='assistant'?'1px solid var(--bd)':'none',boxShadow:m.role==='assistant'?'0 2px 8px rgba(0,0,0,0.04)':'none'}}>{m.content}</div>
+            <div style={{fontSize:10,color:'var(--mt)'}}>{fmtTime(m.time)}</div>
+          </div>)}
+          {loading&&<div style={{maxWidth:'88%',padding:'11px 15px',background:'var(--wh)',border:'1px solid var(--bd)',borderRadius:'13px 13px 13px 3px'}}>
+            <div style={{display:'flex',gap:5,alignItems:'center'}}><style>{`@keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.3}40%{transform:translateY(-5px);opacity:1}}`}</style>{[0,.2,.4].map((d,i)=><div key={i} style={{width:5,height:5,borderRadius:'50%',background:'var(--pk)',opacity:.4,animation:`bounce 1.2s ${d}s infinite`}}/>)}</div>
+          </div>}
+          <div ref={endRef}/>
+        </div>
+        <div style={{position:'sticky',bottom:0,background:`linear-gradient(transparent,var(--bg) 30%)`,paddingTop:12,display:'flex',gap:8}}>
+          <textarea ref={inpRef} style={{flex:1,background:'var(--wh)',border:'1.5px solid var(--bd)',borderRadius:12,padding:'11px 15px',color:'var(--tx)',fontFamily:'Jost',fontSize:14,outline:'none',resize:'none',transition:'border-color .2s',boxShadow:'0 2px 10px rgba(0,0,0,0.04)'}} placeholder="Ask the oracle anything..." value={inp} onChange={e=>setInp(e.target.value)} onFocus={e=>e.target.style.borderColor='var(--pk)'} onBlur={e=>e.target.style.borderColor='var(--bd)'} onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}} rows={1}/>
+          <button onClick={send} disabled={loading||!inp.trim()||!hasKey} style={{width:46,height:46,background:loading||!inp.trim()||!hasKey?'var(--ft)':'var(--pk)',border:'none',borderRadius:12,color:loading||!inp.trim()||!hasKey?'var(--mt)':'var(--wh)',cursor:loading||!inp.trim()||!hasKey?'not-allowed':'pointer',fontSize:18,flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',transition:'background .2s'}}>→</button>
+        </div>
+      </>}
+    </div>
+  );
+}
+
+/* ── VAULT ── */
+function Vault({entries,dreams,caps,setCaps,grief,setGrief,faced,setFaced}){
+  const [tab,setTab]=useState('deck');const [card,setCard]=useState(()=>ld('current_card'));const [archive,setArchive]=useState(()=>ld('card_archive')||[]);const [cardL,setCardL]=useState(false);const [capTitle,setCapTitle]=useState('');const [capContent,setCapContent]=useState('');const [capDate,setCapDate]=useState('');const [toast,setToast]=useState(null);
+  const st=(m)=>{setToast(m);setTimeout(()=>setToast(null),2200);};
+  const hasKey=!!ld('api_key');
+  const drawCard=async()=>{
+    if(!entries.length||cardL)return;setCardL(true);
+    const recent=entries.slice(0,5).map(e=>`${e.date}[${e.mode}/${e.alterEgo||'std'}/voice:${e.voice||'?'}]: ${(e.body||'').slice(0,160)}`).join('\n---\n');
+    const dc=dreams.map(d=>`${d.title}:${d.desc||'?'}`).join('|');
+    const raw=await ai([{role:'user',content:`Generate a Shadow Deck card from this person's journal patterns. Return ONLY valid JSON:\n{"title":"The [Name]","category":"Shadow or Gift or Threshold","description":"2-3 sentences specific to their writing.","question":"One penetrating question."}\n\nDreams: ${dc}\nEntries:\n${recent}`}],'',400);
+    try{const p=JSON.parse((raw||'{}').replace(/```json|```/g,'').trim());const nc={...p,date:todayStr(),id:Date.now().toString()};setCard(nc);const na=[nc,...archive].slice(0,20);setArchive(na);sv('current_card',nc);sv('card_archive',na);}catch{}
+    setCardL(false);
+  };
+  const sealCap=()=>{if(!capContent.trim()||!capDate)return;const nc={id:Date.now().toString(),title:capTitle||'A message to myself',content:capContent,writtenAt:new Date().toISOString(),unlockAt:capDate};const u=[...caps,nc];setCaps(u);sv('time_capsules',u);setCapTitle('');setCapContent('');setCapDate('');st('Sealed ✓ Opens '+fmtDate(capDate));};
+  const isOpen=(c)=>new Date()>=new Date(c.unlockAt);const dLeft=(c)=>Math.ceil((new Date(c.unlockAt)-new Date())/86400000);
+  const faceBoss=(id)=>{const u=[...faced,id];setFaced(u);sv('faced_bosses',u);st('Boss faced. Named things lose power differently.');};
+  const bosses=detectBosses(entries);const catC={Shadow:'var(--rs)',Gift:'var(--sg)',Threshold:'var(--gd)'};
+  return(
+    <div className="screen" style={{position:'relative'}}>
+      <h1>Vault</h1>
+      <div style={{display:'flex',gap:6,marginBottom:22}}>
+        {[['deck','Deck'],['capsules','Capsules'],['grief','Grief'],['bosses','Bosses']].map(([id,l])=><button key={id} onClick={()=>setTab(id)} style={{flex:1,padding:'9px 0',borderRadius:8,border:`1.5px solid ${tab===id?'var(--pk)':'var(--bd)'}`,fontSize:11,fontWeight:600,background:tab===id?'var(--pk)':'var(--wh)',color:tab===id?'var(--wh)':'var(--mt)',cursor:'pointer',fontFamily:'Jost',transition:'all .2s'}}>{l}</button>)}
+      </div>
+      {tab==='deck'&&<>
+        <div className="sub" style={{marginTop:-16}}>Cards drawn from your actual patterns. No two alike.</div>
+        <button onClick={drawCard} disabled={cardL||entries.length===0||!hasKey} style={{width:'100%',padding:14,background:'var(--wh)',border:'1.5px solid var(--bd)',borderRadius:12,color:'var(--mt)',fontSize:13,cursor:cardL||entries.length===0||!hasKey?'not-allowed':'pointer',fontFamily:'Jost',marginBottom:20,fontWeight:500,opacity:cardL||entries.length===0||!hasKey?.45:1,transition:'all .25s',boxShadow:'0 2px 8px rgba(0,0,0,0.03)'}} onMouseEnter={e=>{if(!cardL&&entries.length&&hasKey){e.currentTarget.style.borderColor='var(--pk)';e.currentTarget.style.color='var(--pk)';}}} onMouseLeave={e=>{e.currentTarget.style.borderColor='var(--bd)';e.currentTarget.style.color='var(--mt)';}}>
+          {cardL?'Reading your patterns...':!hasKey?'Add API key to use deck':entries.length===0?'Write entries first':'◈ Draw a card from my patterns'}
+        </button>
+        {card&&<div style={{position:'relative',overflow:'hidden',background:'var(--wh)',border:'1px solid var(--bd)',borderRadius:16,padding:'30px 24px 24px',marginBottom:20,textAlign:'center',boxShadow:'0 4px 20px rgba(180,110,120,0.1)',animation:'fi .6s ease'}}>
+          <div style={{position:'absolute',top:0,left:0,right:0,height:3,background:`linear-gradient(90deg,var(--pk),var(--rs),var(--sg))`}}/>
+          <div style={{fontSize:10,letterSpacing:'2px',textTransform:'uppercase',opacity:.7,marginBottom:20,fontWeight:600,color:catC[card.category]||'var(--pk)'}}>{card.category} · {fmtDate(card.date)}</div>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:28,fontWeight:700,marginBottom:15,lineHeight:1.2,color:'var(--tx)'}}>{card.title}</div>
+          <div style={{fontSize:14,lineHeight:1.75,color:'var(--mt)',marginBottom:20,textAlign:'left'}}>{card.description}</div>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontStyle:'italic',fontSize:19,color:'var(--pk)',lineHeight:1.5,paddingTop:17,borderTop:'1px solid var(--ft)'}}>{card.question}</div>
+        </div>}
+        {archive.length>1&&<><div className="sl">Archive</div>{archive.slice(1).map(c=><div key={c.id} style={{padding:'12px 15px',background:'var(--wh)',borderRadius:9,border:'1px solid var(--bd)',marginBottom:8}}><div style={{fontSize:14,fontWeight:500,marginBottom:2}}>{c.title}</div><div style={{fontSize:10,color:'var(--mt)'}}>{fmtDate(c.date)} · {c.category}</div></div>)}</>}
+      </>}
+      {tab==='capsules'&&<>
+        <div className="sub" style={{marginTop:-16}}>Write to yourself. Sealed until the date you choose. Cannot be opened early.</div>
+        <div className="card" style={{marginBottom:20}}>
+          <div className="sl">Write a new capsule</div>
+          <input className="inp" style={{marginBottom:8}} placeholder="Title..." value={capTitle} onChange={e=>setCapTitle(e.target.value)}/>
+          <textarea className="ta" rows={4} style={{marginBottom:8,fontFamily:"'Cormorant Garamond',serif",fontSize:15,fontStyle:'italic',lineHeight:1.7}} placeholder="Write to yourself in 3 months. Say what you need her to know." value={capContent} onChange={e=>setCapContent(e.target.value)}/>
+          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12,fontSize:12,color:'var(--mt)',fontWeight:500}}><span>Unlock on</span><input type="date" value={capDate} onChange={e=>setCapDate(e.target.value)} min={todayStr()} style={{background:'var(--s1)',border:'1px solid var(--bd)',borderRadius:6,padding:'8px 10px',color:'var(--tx)',fontFamily:'Jost',fontSize:12,outline:'none'}}/></div>
+          <button className="bp" style={{width:'100%'}} onClick={sealCap} disabled={!capContent.trim()||!capDate}>🔒 Seal this capsule</button>
+        </div>
+        {caps.length===0&&<div style={{textAlign:'center',padding:'20px',color:'var(--mt)',fontSize:13,fontStyle:'italic',lineHeight:1.7}}>No capsules yet. The distance between who writes it and who reads it is the clearest evidence of change.</div>}
+        {[...caps].sort((a,b)=>new Date(a.unlockAt)-new Date(b.unlockAt)).map(c=><div key={c.id} className="card" style={{marginBottom:12,opacity:!isOpen(c)?.78:1}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:6}}><div style={{fontSize:11,color:'var(--pk)',fontWeight:500}}>{isOpen(c)?'✓ Unlocked '+fmtDate(c.unlockAt):'🔒 Opens '+fmtDate(c.unlockAt)}</div></div>
+          <div style={{fontSize:15,fontWeight:600,marginBottom:2}}>{c.title}</div>
+          <div style={{fontSize:10,color:'var(--mt)'}}>Written {fmtFull(c.writtenAt)}</div>
+          {isOpen(c)?<div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:16,fontStyle:'italic',lineHeight:1.7,color:'var(--tx)',marginTop:12,paddingTop:12,borderTop:'1px solid var(--ft)'}}>{c.content}</div>:<div style={{fontSize:11,color:'var(--mt)',textAlign:'center',marginTop:8,fontStyle:'italic'}}>Opens in {dLeft(c)} day{dLeft(c)!==1?'s':''}</div>}
+        </div>)}
+      </>}
+      {tab==='grief'&&<>
+        <div style={{textAlign:'center',padding:'16px 0 12px'}}>
+          <div style={{fontSize:30,marginBottom:10}}>🪨</div>
+          <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:21,fontWeight:300,letterSpacing:'2px',marginBottom:8}}>The Grief Drawer</div>
+          <div style={{fontSize:12,color:'var(--mt)',lineHeight:1.7,maxWidth:290,margin:'0 auto 8px'}}>Separate. Sacred. Unanalyzed. For the years of not knowing yourself. The exhaustion of performing. The grief of the unlived version. It just needs a container.</div>
+          <div style={{fontSize:9,color:'var(--mt)',letterSpacing:'2px',textTransform:'uppercase',opacity:.55,marginBottom:18}}>Not read by Claude · Not tracked · Just held</div>
+        </div>
+        <textarea style={{width:'100%',background:'transparent',border:'none',outline:'none',fontFamily:"'Cormorant Garamond',serif",fontSize:18,fontStyle:'italic',color:'var(--mt)',resize:'none',lineHeight:1.9,minHeight:240}} placeholder="Write anything here..." value={grief} onChange={e=>setGrief(e.target.value)}/>
+        <button onClick={()=>{sv('grief_drawer',grief);st('Held ✓');}} style={{width:'100%',padding:10,background:'transparent',border:'1px solid var(--bd)',borderRadius:8,color:'var(--mt)',fontSize:10,cursor:'pointer',fontFamily:'Jost',marginTop:16,letterSpacing:'2px',textTransform:'uppercase',fontWeight:500,transition:'all .2s'}} onMouseEnter={e=>{e.currentTarget.style.borderColor='var(--pk)';e.currentTarget.style.color='var(--pk)';}} onMouseLeave={e=>{e.currentTarget.style.borderColor='var(--bd)';e.currentTarget.style.color='var(--mt)';}}>hold it</button>
+      </>}
+      {tab==='bosses'&&<>
+        <div className="sub" style={{marginTop:-16}}>Patterns that have appeared enough times to demand direct engagement.</div>
+        {bosses.length===0?<div style={{textAlign:'center',padding:'30px 20px',color:'var(--mt)',fontSize:13,lineHeight:1.8}}>No bosses yet. When a stuck loop appears 3+ times in your entries, it becomes a Boss. They're not enemies — they're forces that have been running quietly and now want to be seen.</div>
+        :bosses.map(b=><div key={b.id} style={{background:'var(--wh)',borderRadius:12,border:'1px solid rgba(168,88,104,0.25)',padding:18,marginBottom:12,boxShadow:'0 2px 10px rgba(168,88,104,0.06)'}}>
+          <div style={{display:'flex',alignItems:'baseline',gap:10,marginBottom:6}}>
+            <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:20,fontWeight:600}}>{b.name}</div>
+            <div style={{fontSize:10,color:'var(--rs)',background:'rgba(168,88,104,0.1)',padding:'2px 9px',borderRadius:10,fontWeight:500}}>{b.count}× detected</div>
+          </div>
+          <div style={{fontSize:13,fontStyle:'italic',color:'var(--mt)',marginBottom:12}}>{b.phrase}</div>
+          {faced.includes(b.id)?<div style={{fontSize:12,color:'var(--sg)',fontWeight:500}}>✓ Named and faced. In your Encountered Archive.</div>:<button onClick={()=>faceBoss(b.id)} style={{padding:'9px 18px',background:'transparent',border:'1.5px solid var(--rs)',borderRadius:8,color:'var(--rs)',fontSize:12,cursor:'pointer',fontFamily:'Jost',fontWeight:500,transition:'all .2s'}} onMouseEnter={e=>e.currentTarget.style.background='rgba(168,88,104,0.06)'} onMouseLeave={e=>e.currentTarget.style.background='transparent'}>Face this Boss</button>}
+        </div>)}
+        {faced.length>0&&<div style={{marginTop:16,padding:'12px 15px',background:'var(--wh)',borderRadius:9,border:'1px solid var(--bd)',fontSize:12,color:'var(--mt)'}}>Encountered Archive: {faced.length} boss{faced.length!==1?'es':''} named. Named things lose power differently than unnamed ones.</div>}
+      </>}
+      {toast&&<Toast msg={toast}/>}
+    </div>
+  );
+}
+
+/* ── APP ── */
+const NAV=[{id:'home',icon:'◎',l:'Home'},{id:'journal',icon:'✦',l:'Journal'},{id:'dreams',icon:'◇',l:'Dreams'},{id:'map',icon:'⬡',l:'Map'},{id:'oracle',icon:'◈',l:'Oracle'},{id:'vault',icon:'⬖',l:'Vault'}];
+
+function App(){
+  const [screen,setScreen]=useState('home');
+  const [entries,setEntries]=useState(()=>ld('journal_entries')||[]);
+  const [dreams,setDreams]=useState(()=>ld('dream_threads')||DDFT);
+  const [cap,setCap]=useState(()=>{const dl=ld('daily_logs')||[];const t=dl.find(l=>l.date===todayStr());return t?.capacity||null;});
+  const [hfs,setHfs]=useState(()=>ld('hyperfocuses')||[]);
+  const [caps,setCaps]=useState(()=>ld('time_capsules')||[]);
+  const [grief,setGrief]=useState(()=>ld('grief_drawer')||'');
+  const [faced,setFaced]=useState(()=>ld('faced_bosses')||[]);
+  const [echo,setEcho]=useState(()=>ld('the_echo'));
+  const [narrative,setNarrative]=useState(()=>ld('the_narrative'));
+  const [showSettings,setShowSettings]=useState(false);
+
+  const logCap=(n)=>{setCap(n);const t=todayStr();const dl=ld('daily_logs')||[];const upd=[{date:t,capacity:n},...dl.filter(l=>l.date!==t)].slice(0,90);sv('daily_logs',upd);};
+  const addHf=(topic)=>{const h={topic,date:todayStr(),id:Date.now().toString()};const u=[...hfs,h];setHfs(u);sv('hyperfocuses',u);};
+
+  const render=()=>{
+    switch(screen){
+      case'home':return<Home entries={entries} dreams={dreams} cap={cap} setCap={logCap} hfs={hfs} addHf={addHf} onNav={setScreen} onSettings={()=>setShowSettings(true)}/>;
+      case'journal':return<Journal entries={entries} setEntries={setEntries}/>;
+      case'dreams':return<Dreams dreams={dreams} setDreams={setDreams}/>;
+      case'map':return<MapScreen entries={entries} hfs={hfs}/>;
+      case'oracle':return<Oracle entries={entries} dreams={dreams} echo={echo} setEcho={setEcho} narrative={narrative} setNarrative={setNarrative}/>;
+      case'vault':return<Vault entries={entries} dreams={dreams} caps={caps} setCaps={setCaps} grief={grief} setGrief={setGrief} faced={faced} setFaced={setFaced}/>;
+      default:return null;
+    }
+  };
+
+  return(
+    <>
+      {render()}
+      <nav>
+        {NAV.map(n=><button key={n.id} className={`nb ${screen===n.id?'on':''}`} onClick={()=>setScreen(n.id)}>
+          <span className="ni">{n.icon}</span>
+          <span className="nl">{n.l}</span>
+        </button>)}
+      </nav>
+      {showSettings&&<Settings onClose={()=>setShowSettings(false)}/>}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
